@@ -3,4 +3,4 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 
 
-![Alt text]([/posts/path/to/img.jpg](https://github.com/PatrickGio/Nanoindentation/Figures/Figure_1_2.pdf) "Optional title")
+![Alt text]([/posts/path/to/img.jpg](https://github.com/PatrickGio/Nanoindentation/Figures/Figure_1_2.png) "Optional title")
