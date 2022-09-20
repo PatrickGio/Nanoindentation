@@ -1,0 +1,110 @@
+reset
+#======= Create Box Material ==============
+brick x 10.1 y 10 z 10
+move Volume 1 x 5.05 y -6.0 z 5.0 include_merged
+brick x 10 y 10 z 10
+move Volume 2 x 5 y -6 z 5 include_merged
+subtract body 2  from body 1 
+
+brick x 10 y 10.1 z 10
+move Volume 3 x 5. y -6.05 z 5.0 include_merged
+brick x 10 y 10 z 10
+move Volume 4 x 5 y -6 z 5 include_merged
+subtract body 4  from body 3 
+
+
+brick x 10 y 10 z 10.1
+move Volume 5 x 5. y -6.0 z 5.05 include_merged
+brick x 10 y 10 z 10
+move Volume 6 x 5 y -6 z 5 include_merged
+subtract body 6  from body 5 
+
+
+
+brick x 10.0 y 0.1 z 0.1
+move Volume 7 x 5.0 y -11.05 z 10.05 include_merged
+brick x 0.1 y 10 z 0.1
+move Volume 8 x 10.05 y -6.0 z 10.05 include_merged
+brick x 0.1 y 0.1 z 10
+move Volume 9 x 10.05 y -11.05 z 5.0 include_merged
+
+brick x 0.1 y 0.1 z 0.1
+move Volume 10 x 10.05 y -11.05 z 10.05 include_merged
+
+
+brick x 10 y 10 z 10
+move Volume 11 x 5 y -6 z 5 include_merged
+
+brick x 1 y 1 z 1
+move Volume 12 x 0.5 y -1.5 z 0.5 include_merged
+subtract body 12 from body 11   keep_tool
+
+#======= Mesh Box Material ==============
+volume 12 size 0.1111111111111
+mesh volume 12
+volume 11 size 1
+mesh volume 11
+
+
+volume 7 size 1
+mesh volume 7
+volume 8 size 1
+mesh volume 8
+volume 9 size 1
+mesh volume 9
+volume 10 size 0.1
+mesh volume 10
+
+volume 1 size 1
+mesh volume 1
+volume 3 size 1
+mesh volume 3
+volume 5 size 1
+mesh volume 5
+
+compress
+refine surface 52,53,54 numsplit 2 bias 1.0 depth 0
+
+##merge volume 1 with volume 2
+merge all
+compress
+
+block 1 volume 1,2, 3,4,5,6,7,8,9
+block 1 element type HEX8
+
+
+sideset 1 add surface 40  
+sideset 1 add surface 37  
+sideset 1 add surface 16
+sideset 1 add surface 21
+sideset 1 add surface 10  
+
+sideset 2 add surface 41  
+sideset 2 add surface 35 
+sideset 2 add surface 5
+sideset 2 add surface 28
+sideset 2 add surface 11
+
+sideset 3 add surface 7
+sideset 3 add surface 20
+sideset 3 add surface 29
+sideset 3 add surface 32
+
+sideset 4 add surface 38
+sideset 4 add surface 42
+sideset 4 add surface 15
+sideset 4 add surface 6
+sideset 4 add surface 25
+
+#======= Export ==============
+export abaqus "C:/Users/pgiol/Documents/DrRausch/NeuralNetworks/SynthData/Mesher_SynthData/TestMesh.inp"  dimension 3  overwrite  everything
+
+
+
+
+
+
+
+
+
+
