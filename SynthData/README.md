@@ -8,6 +8,6 @@
  (A-C) represents the forward problem, while the inverse problem, determining material parameters from experimental data, is accomplished through the use of two machine learning models. 
  
  
-<img src="Figures/Figure_1.png" alt="" width="100%"/>
+<img src="Figures/Figure_1.png" alt="Summary of Synthetic Data Generation" width="100%"/>
  
  
