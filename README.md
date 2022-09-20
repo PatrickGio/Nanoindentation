@@ -10,9 +10,14 @@ Utilize machine learning for accelerated parameter identification from indentati
  - Bare minimum pull the directory Trained_NN_Models and the file AnalyzeData.py
  - Create a new directory called ExperimentalData next to Trained_NN_Models, inside this new directory place your data
  
-**Minimum Software requirements**
+**Software requirements**
  - Python 3 & libraries: pickle
  - TensorFlow/Keras
+ - Febio3 (optional: to generate new synthetic data
+         path: 'C:/Program Files/Coreform Cubit 2022.4/bin/coreform_cubit.exe')
+ - Cubit Coreform 2022.4 (optional: to generate new synthetic data
+         path: 'C:/Program Files/FEBioStudio/febio/febio3.exe')
+
  
 **Input**
 Either place extracted data or raw data in the folder using the formats below.
