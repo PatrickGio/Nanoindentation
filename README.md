@@ -14,8 +14,10 @@ Utilize machine learning for accelerated parameter identification from indentati
  - Python 3 & libraries: pickle
  - TensorFlow/Keras
  - Febio3 (optional: to generate new synthetic data
+         
          path: 'C:/Program Files/Coreform Cubit 2022.4/bin/coreform_cubit.exe')
  - Cubit Coreform 2022.4 (optional: to generate new synthetic data
+         
          path: 'C:/Program Files/FEBioStudio/febio/febio3.exe')
 
  
