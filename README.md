@@ -4,4 +4,4 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 <img src="Figures/Figure_1_2.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
 
-**{Summary of the modelling approaches.}
+**Summary of the modelling approaches.**
