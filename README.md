@@ -4,7 +4,7 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 
 
-# Quick Start
+## Quick Start
 
 ### Example
 
@@ -16,7 +16,7 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 
 
-# Summary
+## Summary
 
 ### Synthetic Data Generation
 
