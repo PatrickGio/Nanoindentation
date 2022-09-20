@@ -4,4 +4,4 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 
 
-![github-small](https://github.com/PatrickGio/Nanoindentation/Figures/Figure_1_2.pdf)
+![github-small]("https://github.com/PatrickGio/Nanoindentation/Figures/Figure_1_2.pdf")
