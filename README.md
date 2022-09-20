@@ -17,11 +17,20 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 **Input**
  - Either place extracted data or raw data in the folder
- 
+ - Code will search for postition of key words, but it should be structured like:
+ <img src="Figures/Raw_Data_Input.png" alt="" width="50%"/>
+
  Raw data structure:
  
  Extracted data structure:
-
+ - Use nested dictionaries to store your runs and input into ML model
+ - Name of outer keys do not matter, but nested key names are **specific**:
+    - "Radius":
+    - "Width":
+    - "Thickness":
+    - "Indentation":
+    - "Load":
+ <img src="Figures/Structured_Data_Input.png" alt="" width="50%"/>
 
 
 
