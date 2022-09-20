@@ -9,5 +9,3 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 
 
-
-<img src="Figures/Figure_1_2.pdf" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
