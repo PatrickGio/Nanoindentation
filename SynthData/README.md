@@ -8,6 +8,6 @@
  (A-C) represents the forward problem, while the inverse problem, determining material parameters from experimental data, is accomplished through the use of two machine learning models. 
  
  
-<img src="Figures/Figure_1.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
+<img src="Figures/Figure_1.png" alt="" width="100%"/>
  
  
