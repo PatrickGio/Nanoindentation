@@ -9,6 +9,7 @@ Utilize machine learning for accelerated parameter identification from indentati
 **Clone Repository**
  - Bare minimum pull the directory Trained_NN_Models and the file AnalyzeData.py
  - Create a new directory called ExperimentalData next to Trained_NN_Models, inside this new directory place your data
+ - Pull directory Synthdata (optional: for generating new synthetic data)
  
 **Software requirements**
  - Python 3 & libraries: pickle
