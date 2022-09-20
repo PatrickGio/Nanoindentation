@@ -7,12 +7,22 @@ Utilize machine learning for accelerated parameter identification from indentati
 ## Quick Start
 
 ### Example
+**Clone Repository**
+ - Bare minimum pull the directory Trained_NN_Models and the file AnalyzeData.py
+ - Create a new directory called ExperimentalData next to Trained_NN_Models, inside this new directory place your data
 
-####Input 
+**Minimum Software requirements**
+ - Python 3 & libraries: pickle
+ - TensorFlow/Keras
 
-<img src="Figures/Figure_5.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
+**Input**
+ - Either place extracted data or raw data in the folder
+ 
+ Raw data structure:
+ 
+ Extracted data structure:
 
-\textbf{Prediction of averaged experimental data: mouse brain slices and chemically fixed brain slices.} Comparison of the averaged loading curves (686 samples) from mouse brain slices (black triangle marker), and the averaged loading curves (686 samples) from chemically fixed mouse brain slices (black circle marker) were plotted with the neural network predictions in red and grey, respectively. (A) Neo-Hookean material model with the least squares ML approach, (B) Gent material model with the least squares ML approach, (C) Neo-Hookean material model with the direct inverse ML approach, and (D) Gent material model with the direct inverse ML approach. Predicted material parameters are included in the respective legend.
+
 
 
 
@@ -46,6 +56,12 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 
 ### Experimental Data: Brain Tissue
+
+
+
+<img src="Figures/Figure_5.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
+
+\textbf{Prediction of averaged experimental data: mouse brain slices and chemically fixed brain slices.} Comparison of the averaged loading curves (686 samples) from mouse brain slices (black triangle marker), and the averaged loading curves (686 samples) from chemically fixed mouse brain slices (black circle marker) were plotted with the neural network predictions in red and grey, respectively. (A) Neo-Hookean material model with the least squares ML approach, (B) Gent material model with the least squares ML approach, (C) Neo-Hookean material model with the direct inverse ML approach, and (D) Gent material model with the direct inverse ML approach. Predicted material parameters are included in the respective legend.
 
 
 
