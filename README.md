@@ -17,9 +17,9 @@ Utilize machine learning for accelerated parameter identification from indentati
 
 **Input**
  - Either place extracted data or raw data in the folder
- - Code will search for postition of key words, but it should be structured like:
 
  Raw data structure:
+ - Code will search for postition of key words, but it should be structured like:
 
  <img src="Figures/Raw_Data_Input.png" alt="" width="50%"/>
 
