@@ -90,7 +90,9 @@ Two different ML appraoches were used to solve the inverse problem trained on ei
  
 The four neural networks were trained and validated before their ability to predict unseen data, testing data set, was evaluated. Comparison of the neural network (black dots) prediction of unseen data to the Hertzian solution (red triangle) and Modified Hertzian solution (orange squares). Predicted shear modulus is plotted against target shear modulus, where the dotted red line is a perfect prediction, for the least squares ML approach (Figure 3A,B) and the direct inverse ML approach (Figure 3D,E). For the ML models trained on the Gent FE model prediction of the Jm material parameter was plotted against the known target values, see Figure 3 C,F. $ R^2$ values were included for each parameter of each of the ML models to compare their accuracy. The Hertzian and modified-Hertzian models were shown to be unreliable at predicting an accurate shear modulus for material that behaves lik a Gent Material, see Figure 3B,E. While the least squares ML approach proved unable to predict accurate Jm values greater than 1, see Figure 3C.
  
- 
+ <img src="Figures/Figure_4.png" alt="\textbf{Model predictions of synthetic data.}" width="100%"/>
+
+
 ### Experimental Data: Brain Tissue
 
 Comparison of the averaged loading curves (686 samples) from mouse brain slices (black triangle marker), and the averaged loading curves (686 samples) from chemically fixed mouse brain slices (black circle marker) were plotted with the neural network predictions in red and grey, respectively. 
