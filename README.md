@@ -23,75 +23,72 @@ Utilize machine learning for accelerated parameter identification from indentati
 
  
 **Input**
+ 
 Either place extracted data or raw data in the folder using the formats below.
  
- Raw data structure:
+ _Raw data structure:_
+  
  Code will search for postition of key words, but it should be structured like:
  
  <img src="Figures/Raw_Data_Input.png" alt="" width="50%"/>
  
   
- Extracted data structure:
+ _Extracted data structure:_
+  
  Use nested dictionaries to store your runs and input into ML model
  Name of outer keys do not matter, but nested key names are **specific**:
-    - "Radius":
-    - "Width":
-    - "Thickness":
-    - "Indentation":
-    - "Load":
+  
+    - "Radius": (float) stores radius of indenter in meters
+     
+    - "Width": (float) stores width of sample in meters
+     
+    - "Thickness": (float) stores thickness of sample in meters
+     
+    - "Indentation": (array) stores indentation depth in meters
+     
+    - "Load": (array) stores load values in newtons
+     
  <img src="Figures/Structured_Data_Input.png" alt="" width="50%"/>
  
  
 **Output**
- 
- 
+  
+Model outputs a text file containing identified material parameters as well as the calculated RSME of the forward model produced with the predicted material parameters normalized to the RMSE of a Hertzian fit.
+  
 ### Example
- 
- 
- 
- 
- 
- 
+  
+  
+  
+  
+  
+  
 ## Summary
  
 ### Synthetic Data Generation
 
- A) LHS was used to sample the four parameter input space ( $\delta y$, $W$, $H$, and $\mu$) for the neo-Hookean material model, and five parameter input space ( $\delta y$, $W$, $H$, $\mu$, and $Jm$) for the Gent material model to generate a FE input file. 
- 
- B) The FE input file was fed into the implicit mixed FE model (C) to generate a load-displacement curve output, FE output file. 
- 
- (A-C) represents the forward problem, while the inverse problem, determining material parameters from experimental data, is accomplished through the use of two machine learning models. 
- 
- 
+Our machine learning (ML) models are trained on data generated from finite element (FE) simulations. To test the ability of our model's ability for accurate parameter identification of thin complex soft-tissues we examined two material models: neo-Hookean and Gent material model. Latin hypercube sampling was used to sample the four parameter input space ( $\delta y$, $W$, $H$, and $\mu$) for the neo-Hookean material model, and five parameter input space ( $\delta y$, $W$, $H$, $\mu$, and $Jm$) for the Gent material model to generate a FE input file, see Figure 1A. The FE input file was then fed into the implicit mixed FE model to generate a load-displacement curve output, FE output file, see Figure 1B,C. Figure 1A-C represents the forward problem, while the inverse problem, determining material parameters from experimental data, is accomplished through the use of two machine learning models.
+  
+  
 <img src="Figures/Figure_1.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
+  
+ **Figure 1**
  
+  
+  
+### Inverse Problem: Machine Learning
  
+Two different ML appraoches were used to solve the inverse problem trained on either neo-Hookean or Gent FE model data. The first machine learning model used a neural network to learn the forward problem, predict the loading curve ( $P^*_n$) from material properties ( $\mu^*$, $Jm^*$) and sample dimensions ( $W^*$, $H^*$), which is called as the mapping function for a nonlinear least squares algorithm to solve the inverse problem, see Figure 2D. The second machine learning model used a neural network to directly learn the inverse problem, predict material parameters ( $\mu$, $Jm$) from sample dimensions ( $W^*$, $H^*$), loading curve ( $P^*_n$), and the slope of the loading curve ( $S^*_n$), see Figure 2E
  
- 
-### Inverse Problem
-
-(D) the first machine learning model used a neural network to learn the forward problem, predict the loading curve ( $P^*_n$) from material properties ( $\mu^*$, $Jm^*$) and sample dimensions ( $W^*$, $H^*$), which is called as the mapping function for a nonlinear least squares algorithm to solve the inverse problem. 
-
-(E) the second machine learning model used a neural network to directly learn the inverse problem, predict material parameters ( $\mu$, $Jm$) from sample dimensions ( $W^*$, $H^*$), loading curve ( $P^*_n$), and the slope of the loading curve ( $S^*_n$)
-
 <img src="Figures/Figure_2.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
+   
+ **Figure 2**
+   
+   
+    
+  
+### Training, Validation, and Testing of Neural Networks
  
- 
- 
- 
-### Machine Learning 
-
-A) Comparison of the neural network (black dots) prediction of unseen data to the Hertzian solution (red triangle) and Modified Hertzian solution (orange squares). Predicted shear modulus is plotted against target shear modulus, where the dotted red line is a perfect prediction. 
-
-B) Magnification of A. 
-
-C) Comparison of experimental data with 0.1R max indentation to neural network prediction. 
-
-D) Comparison of experimental data with 0.5R max indentation to neural network prediction.}
-
-<img src="Figures/Figure_4.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
- 
- 
+The four neural networks were trained and validated before their ability to predict unseen data, testing data set, was evaluated. Comparison of the neural network (black dots) prediction of unseen data to the Hertzian solution (red triangle) and Modified Hertzian solution (orange squares). Predicted shear modulus is plotted against target shear modulus, where the dotted red line is a perfect prediction, for the least squares ML approach (Figure 3A,B) and the direct inverse ML approach (Figure 3D,E). For the ML models trained on the Gent FE model prediction of the Jm material parameter was plotted against the known target values, see Figure 3 C,F. $ R^2$ values were included for each parameter of each of the ML models to compare their accuracy. The Hertzian and modified-Hertzian models were shown to be unreliable at predicting an accurate shear modulus for material that behaves lik a Gent Material, see Figure 3B,E. While the least squares ML approach proved unable to predict accurate Jm values greater than 1, see Figure 3C.
  
  
 ### Experimental Data: Brain Tissue
