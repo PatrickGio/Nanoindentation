@@ -92,37 +92,40 @@ The four neural networks were trained and validated before their ability to pred
  
  <img src="Figures/Figure_4.png" alt="\textbf{Model predictions of synthetic data.}" width="100%"/>
 
+**Figure 3**
 
-### Experimental Data: Brain Tissue
-
-Comparison of the averaged loading curves (686 samples) from mouse brain slices (black triangle marker), and the averaged loading curves (686 samples) from chemically fixed mouse brain slices (black circle marker) were plotted with the neural network predictions in red and grey, respectively. 
-
-(A) Neo-Hookean material model with the least squares ML approach, (B) Gent material model with the least squares ML approach, 
-
-(C) Neo-Hookean material model with the direct inverse ML approach, and (D) Gent material model with the direct inverse ML approach. Predicted material parameters are included in the respective legend.
-
-
-<img src="Figures/Figure_5.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
-  
-  
+ 
  
   
-The predicted material parameters for the Gent material model with the direct inverse ML approach were plotted for the mouse brain slices 
+### Experimental Data: Brain Tissue
+ 
+With the ML models ability to accurately predict useen synthetic data the model was then used to analyze highly nonlinear brain tissue before and after chemical fixation. Comparison of the averaged loading curves (686 samples) from mouse brain slices (black triangle marker), and the averaged loading curves (686 samples) from chemically fixed mouse brain slices (black circle marker) were plotted with the neural network predictions in red and grey, respectively, see Figure 4A Neo-Hookean material model with the least squares ML approach, Figure 4B Gent material model with the least squares ML approach, Figure 4C Neo-Hookean material model with the direct inverse ML approach, and Figure 4D Gent material model with the direct inverse ML approach. Predicted material parameters are included in the respective legend. Both the least squares ML approach and direct inverse ML approach trained on Gent FE model data were able to accurately capture the compression stiffening behaviour of brain tissue.
+ 
+  
+<img src="Figures/Figure_5.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
+  
+**Figure 4**
+ 
+ 
+  
+   
 
-(A,C) (grey circle markers) and chemically fixed mouse brain slices 
-
-(B,D) (red circle markers). The Gent material parameters for the averaged experimental loading curves for the mouse brain slices (red dotted line) and chemically fixed brain slices (black dotted line) are plotted over the parameters determined for the individual data samples.}
+  
+The predicted material parameters for the Gent material model with the direct inverse ML approach were plotted for the mouse brain slices (Figure 5A,C) (grey circle markers) and chemically fixed mouse brain slices (Figure 5B,D) (red circle markers). The Gent material parameters for the averaged experimental loading curves for the mouse brain slices (red dotted line) and chemically fixed brain slices (black dotted line) are plotted over the parameters determined for the individual data samples. The chemical fixation caused a statistically significant stiffening in the brain tissues, while the compression, strain-dependent, stiffening behaviour of the tissue was reduced.
 
 
 <img src="Figures/Figure_6.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
- 
- 
+  
+ **Figure 5**
+
  
  
   
 ## Layout of Repository
 
 ### SynthData
+#### FEmodel_Input_Output
+
 ### Trained_NN_Models
 ### Functions
 ### ExperimentalData
