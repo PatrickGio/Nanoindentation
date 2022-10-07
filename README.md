@@ -112,7 +112,7 @@ Our machine learning (ML) models are trained on data generated from finite eleme
   
 ## Inverse Problem: Machine Learning
  
-Two different ML appraoches were used to solve the inverse problem trained on either neo-Hookean or Gent FE model data. The first machine learning model used a neural network to learn the forward problem, predict the loading curve ( $P^*_n$) from material properties ( $\mu^*$, $Jm^*$) and sample dimensions ( $W^*$, $H^*$), which is called as the mapping function for a nonlinear least squares algorithm to solve the inverse problem, see Figure 2D. The second machine learning model used a neural network to directly learn the inverse problem, predict material parameters ( $\mu$, $Jm$) from sample dimensions ( $W^*$, $H^*$), loading curve ( $P^*_n$), and the slope of the loading curve ( $S^*_n$), see Figure 2E
+Two different ML appraoches were used to solve the inverse problem trained on either neo-Hookean or Gent FE model data. The first machine learning model used a neural network to learn the forward problem, predict the loading curve ( $P^*_n$ ) from material properties ( $\mu^*$, $Jm^*$) and sample dimensions ( $W^*$, $H^*$), which is called as the mapping function for a nonlinear least squares algorithm to solve the inverse problem, see Figure 2D. The second machine learning model used a neural network to directly learn the inverse problem, predict material parameters ( $\mu$, $Jm$) from sample dimensions ( $W^*$, $H^*$), loading curve ( $P^*_n$), and the slope of the loading curve ( $S^*_n$ ), see Figure 2E
  
 <img src="Figures/Figure_2.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
    
