@@ -1,0 +1,80 @@
+reset
+#======= Create Box Material ==============
+brick x 10.1 y 10 z 10
+move Volume 1 x 5.05 y -6.0 z 5.0 include_merged
+brick x 10 y 10 z 10
+move Volume 2 x 5 y -6 z 5 include_merged
+subtract body 2  from body 1 
+
+brick x 10 y 10 z 10.1
+move Volume 3 x 5. y -6.0 z 5.05 include_merged
+brick x 10 y 10 z 10
+move Volume 4 x 5 y -6 z 5 include_merged
+subtract body 4  from body 3
+
+
+brick x 0.1 y 10 z 0.1
+move Volume 5 x 10.05 y -6.0 z 10.05 include_merged
+
+
+brick x 10 y 10 z 10
+move Volume 6 x 5 y -6 z 5 include_merged
+
+brick x 1 y 1 z 1
+move Volume 7 x 0.5 y -1.5 z 0.5 include_merged
+subtract body 7 from body 6   keep_tool
+
+
+
+#======= Mesh Box Material ==============
+volume 7 size 0.1111111111111
+mesh volume 7
+volume 6 size 1
+mesh volume 6
+
+volume 1 size 1
+mesh volume 1
+volume 3 size 1
+mesh volume 3
+volume 5 size 1
+mesh volume 5
+
+
+compress
+refine surface 28,29,30 numsplit 2 bias 1.0 depth 0
+
+##merge volume 1 with volume 2
+merge all
+compress
+
+block 1 volume 1,2, 3,4,5
+block 1 element type HEX8
+
+sideset 1 add surface 24  
+sideset 1 add surface 21
+sideset 1 add surface 10
+
+sideset 2 add surface 19
+sideset 2 add surface 25 
+sideset 2 add surface 5
+
+sideset 3 add surface 17
+sideset 3 add surface 4
+sideset 3 add surface 11
+sideset 3 add surface 14
+
+sideset 4 add surface 22
+sideset 4 add surface 26
+sideset 4 add surface 6
+sideset 4 add surface 9
+sideset 4 add surface 15
+
+
+#======= Export ==============
+export abaqus "C:/Users/pgiol/Documents/DrRausch/NeuralNetworks/SynthData/Mesher_SynthData_Gent/TestMesh.inp"  dimension 3  overwrite  everything
+
+
+
+
+
+
