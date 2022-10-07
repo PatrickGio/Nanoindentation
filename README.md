@@ -30,11 +30,10 @@ Either place extracted data or raw data in the directory path below, make sure t
  
   
  <img src="Figures/InputData_Directory.png" alt="" width="50%"/>
-  
-   
-    
-  
-  
+   <br />
+    <br />
+     <br />
+      <br />
    
     
  ### Raw data structure
