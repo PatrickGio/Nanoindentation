@@ -161,9 +161,14 @@ The predicted material parameters for the Gent material model with the direct in
 # Layout of Repository
 
 ### src_generate_fe_dataset
-   - Generate synthetic FE datasets to train neural networks
-   #### FEmodel_Input_Output
-      - Stores newly generated FE datasets as Input files (W,H, $ \delta y$, Jm) and Output Files ($P_n$)
+    - Generate synthetic FE datasets to train neural networks
+    **Cubit_Mesher**
+        Cubit coreform mesher and journal files.
+    **FEmodel_Input_Output**
+    - Stores newly generated FE datasets as Input files (W,H, $ \delta y$, Jm) and Output Files ($P_n$)
+    **Meshes**
+        Stores meshes that can be reloaded
+        
 
 
 ### Trained_NN_Models
