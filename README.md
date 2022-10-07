@@ -161,7 +161,7 @@ The predicted material parameters for the Gent material model with the direct in
 # Layout of Repository
 
 ## src_generate_fe_dataset
-    - Generate synthetic FE datasets to train neural networks
+ - Generate synthetic FE datasets to train neural networks
 ### Cubit_Mesher
 
 ### FEBio_Solver_GT
