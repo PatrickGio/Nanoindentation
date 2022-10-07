@@ -29,10 +29,14 @@ Utilize machine learning for accelerated parameter identification from indentati
 Either place extracted data or raw data in the directory path below, make sure to follow the proper syntax of the following sections.
  
   
- <img src="Figures/InputData_Directory.png" alt="" width="75%"/>
- 
- 
+ <img src="Figures/InputData_Directory.png" alt="" width="50%"/>
   
+   
+    
+  
+  
+   
+    
  ### Raw data structure
  
    
