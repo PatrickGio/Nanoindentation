@@ -6,7 +6,7 @@ Utilize machine learning for accelerated parameter identification from indentati
  
 ## Quick Start
  
-**Clone Repository**
+### Clone Repository
  - Bare minimum pull the directories Trained_NN_Models, data, and results as well as the files main_AnalyzeData.py and subfunctions_AnalyzeData.py
  - Inside the directory Nanoindentation/data/ExperimentalData place your data
  - Pull directory src_generate_fe_dataset (optional: for generating new synthetic data)
