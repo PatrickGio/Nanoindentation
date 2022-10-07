@@ -31,8 +31,6 @@ Either place extracted data or raw data in the directory path below, make sure t
    <br />
    
    <img src="Figures/InputData_Directory.png" alt="" width="50%"/>
-   
-   <br />
    <br />   
    <br />
 
@@ -44,8 +42,6 @@ Either place extracted data or raw data in the directory path below, make sure t
   
  <img src="Figures/Raw_Data_Input.png" alt="" width="50%"/>
   
-   <br />
-   <br />
    <br />
    
  ### Extracted data structure:
@@ -98,7 +94,9 @@ The results are the file below is generated in the results directory and the plo
 
 <img src="Figures/Output_Figure.png" alt="" width="75%"/>
   
-    
+   <br />
+   <br />
+
 ## Summary
  
 ### Synthetic Data Generation
@@ -109,8 +107,8 @@ Our machine learning (ML) models are trained on data generated from finite eleme
 <img src="Figures/Figure_1.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
   
  **Figure 1**
- 
-  
+   <br />
+   <br />
   
 ### Inverse Problem: Machine Learning
  
@@ -119,7 +117,8 @@ Two different ML appraoches were used to solve the inverse problem trained on ei
 <img src="Figures/Figure_2.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
    
  **Figure 2**
-   
+   <br />
+   <br />
    
     
   
@@ -130,7 +129,8 @@ The four neural networks were trained and validated before their ability to pred
  <img src="Figures/Figure_4.png" alt="\textbf{Model predictions of synthetic data.}" width="100%"/>
 
 **Figure 3**
-
+   <br />
+   <br />
  
  
   
@@ -142,9 +142,8 @@ With the ML models ability to accurately predict useen synthetic data the model 
 <img src="Figures/Figure_5.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
   
 **Figure 4**
- 
- 
-  
+   <br />
+   <br />
    
 
   
@@ -154,7 +153,8 @@ The predicted material parameters for the Gent material model with the direct in
 <img src="Figures/Figure_6.png" alt="\textbf{Summary of the modelling approaches.}" width="100%"/>
   
  **Figure 5**
-
+   <br />
+   <br />
  
  
   
