@@ -7,9 +7,10 @@ Utilize machine learning for accelerated parameter identification from indentati
 ## Quick Start
  
 **Clone Repository**
- - Bare minimum pull the directory Trained_NN_Models and the file AnalyzeData.py
- - Create a new directory called ExperimentalData next to Trained_NN_Models, inside this new directory place your data
- - Pull directory Synthdata (optional: for generating new synthetic data)
+ - Bare minimum pull the directories Trained_NN_Models, data, and results as well as the files main_AnalyzeData.py and subfunctions_AnalyzeData.py
+ - Inside the directory Nanoindentation/data/ExperimentalData place your data
+ - Pull directory src_generate_fe_dataset (optional: for generating new synthetic data)
+ - Pull directory src_train_metamodels (optional: for training new neural networks)
  
 **Software requirements**
  - Python 3 & libraries: pickle
@@ -26,7 +27,9 @@ Utilize machine learning for accelerated parameter identification from indentati
  
 Either place extracted data or raw data in the folder using the formats below.
  
- _Raw data structure:_
+ Raw data structure:
+ ======
+
   
  Code will search for postition of key words, but it should be structured like:
  
