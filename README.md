@@ -160,18 +160,15 @@ The predicted material parameters for the Gent material model with the direct in
   
 # Layout of Repository
 <details>
-  <summary>**src_generate_fe_dataset**</summary>
+  <summary>src_generate_fe_dataset</summary>
     - Generate synthetic FE datasets to train neural networks
-  <summary>**Cubit_Mesher**</summary>
-
  
+ 
+  <summary>src_train_metamodels</summary>
+
+  <summary>trained_metamodels</summary>
         
+  <summary>data</summary>
 
-
-### Trained_NN_Models
-### Functions
-### ExperimentalData
-### Results
-
-
+  <summary>results</summary>
 
