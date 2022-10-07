@@ -35,7 +35,8 @@ Either place extracted data or raw data in the directory path below, make sure t
    <br />
    <br />   
    <br />
- ### Raw data structure
+
+### Raw data structure
  
    
  Code will search for postition of key words, but it should be structured like:
@@ -46,7 +47,8 @@ Either place extracted data or raw data in the directory path below, make sure t
    <br />
    <br />
    <br />
-### Extracted data structure:
+   
+ ### Extracted data structure:
   
  Use nested dictionaries to store your runs and input into ML model
  Name of outer keys do not matter, but nested key names are **specific**:
@@ -75,6 +77,7 @@ Model outputs a text file containing identified material parameters as well as t
    <br />
  
    <br />
+   
 ### Example
   
 For the pickle file above and setting in the script main_AnalyzeData.py:
