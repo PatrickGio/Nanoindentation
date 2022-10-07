@@ -12,7 +12,7 @@ Utilize machine learning for accelerated parameter identification from indentati
  - Pull directory src_generate_fe_dataset (optional: for generating new synthetic data)
  - Pull directory src_train_metamodels (optional: for training new neural networks)
  
-**Software requirements**
+### Software requirements
  - Python 3 & libraries: pickle
  - TensorFlow/Keras
  - Febio3 (optional: to generate new synthetic data
@@ -21,24 +21,28 @@ Utilize machine learning for accelerated parameter identification from indentati
  - Cubit Coreform 2022.4 (optional: to generate new synthetic data
          
          'C:/Program Files/FEBioStudio/febio/febio3.exe')
-
  
-**Input**
+  
+  
+### Input
  
 Either place extracted data or raw data in the directory path below, make sure to follow the proper syntax of the following sections.
-
- <img src="Figures/InputData_Directory.png" alt="" width="75%"/>
-
  
- **Raw data structure:**
-
   
+ <img src="Figures/InputData_Directory.png" alt="" width="75%"/>
+ 
+ 
+  
+ ### Raw data structure
+ 
+   
  Code will search for postition of key words, but it should be structured like:
  
- <img src="Figures/Raw_Data_Input.png" alt="" width="50%"/>
- 
   
-**Extracted data structure:**
+ <img src="Figures/Raw_Data_Input.png" alt="" width="50%"/>
+  
+   
+### Extracted data structure:
   
  Use nested dictionaries to store your runs and input into ML model
  Name of outer keys do not matter, but nested key names are **specific**:
@@ -53,27 +57,33 @@ Either place extracted data or raw data in the directory path below, make sure t
      
     - "Load": (array) stores load values in newtons
      
+      
+       
  <img src="Figures/Structured_Data_Input.png" alt="" width="75%"/>
- 
- 
-**Output**
+  
+  
+  
+### Output
   
 Model outputs a text file containing identified material parameters as well as the calculated RSME of the forward model produced with the predicted material parameters, as well as a plot containting four suplots. The plot shows the fit of the averaged experimental data along with the parameter fits, a histogram of the RMSE, and the bottom two suplots show the predicted shear modulus and Jm (dots) compared to the material parameters for the averaged loading curve (dashed line).
   
 ### Example
- 
+  
 For the pickle file above and setting in the script main_AnalyzeData.py:
-   
+    
      Data_Type = 'dict'
      FileName = 'Test_Example_Dict'
  
-The results are the file below is generated in the results directory and the plot below is created.
   
-   <img src="Figures/OutputData_Parameters.png" alt="" width="75%"/>
-
- <img src="Figures/Output_Figure.png" alt="" width="75%"/>
- 
+The results are the file below is generated in the results directory and the plot below is created.
    
+   
+ <img src="Figures/OutputData_Parameters.png" alt="" width="75%"/>
+   
+  
+ <img src="Figures/Output_Figure.png" alt="" width="75%"/>
+  
+    
 ## Summary
  
 ### Synthetic Data Generation
