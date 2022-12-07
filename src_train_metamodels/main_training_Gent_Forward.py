@@ -101,13 +101,13 @@ xtrain, ytrain, xtest, ytest, xpred, ypred = Scale_Input_Output(FEA_fit_params, 
 def ModelRun():
     
     n_inputs, n_outputs = xtrain.shape[1], ytrain.shape[1]
-
     
+    # Sample Weights
     sample_weight = np.copy(xtrain[:,2])
     sample_weight[sample_weight <= 0.1] =100
     sample_weight[sample_weight > 0.1] = 0.1
     
-    
+    # Neural Network Architecture
     model = Sequential()
     initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
     bias_initializer = initializers.Constant(-0.1) #tf.keras.initializers.RandomNormal(mean=1., stddev=1.)
@@ -120,10 +120,8 @@ def ModelRun():
     model.add(Dense(n_outputs,kernel_initializer=initializer,bias_initializer=bias_initializer,activation=LeakyReLU(alpha=0.3)))# activation='linear') )
     
     model.compile(loss='mse', optimizer = 'adam')
-    
     hist = model.fit(xtrain, ytrain, epochs=EPOCHS, sample_weight=sample_weight, verbose=0,validation_data=(xtest, ytest),batch_size=25)
         
-    
     Nd = 100
     
     # Error in Predicting Validation Data
@@ -133,11 +131,11 @@ def ModelRun():
     Yhat_test = np.zeros((len(xtest[:,0]),n_outputs))
     Y_test = np.zeros((len(xtest[:,0]),n_outputs))
     for i in range(0,len(xtest[:,0])):
+        # Neural Network Prediction
         yhat_test = model.predict([xtest[i,:].tolist()])
         
-        Ppred = np.zeros(Nd)
-        Pact = np.zeros(Nd)
-        Err = np.zeros(Nd)
+        # Rescale Output
+        Ppred = np.zeros(Nd);  Pact = np.zeros(Nd); Err = np.zeros(Nd)
         for k in range(0,Nd):
             minP = min((Model_Output_Resampled[k,:])); maxP = max((Model_Output_Resampled[k,:]))
             Ppred[k] = ((yhat_test[0][k]*(maxP-minP) + minP))
@@ -145,9 +143,9 @@ def ModelRun():
                         
             Err[k] = (abs(Ppred[k]-Pact[k])/abs(Pact[k])*100)
                 
+        # Store Model Prediction and Error
         Yhat_test[i,:] = Ppred
         Y_test[i,:] = Pact
-
         error_test[i] = np.average(Err)    #np.average(abs(yhat_test-ytest[i])/yhat_test*100)
         
     # Error in Predicting Testing Data
@@ -155,21 +153,20 @@ def ModelRun():
     Y_pred = np.zeros((len(xpred[:,0]),n_outputs))
     Yhat_pred = np.zeros((len(xpred[:,0]),n_outputs))
     for i in range(0,len(xpred[:,0])):
+        # Neural Network Prediction
         yhat_pred = model.predict([xpred[i,:].tolist()])
         
-        Ppred = np.zeros(Nd)
-        Pact = np.zeros(Nd)
-        Err = np.zeros(Nd)
+        # Rescale Output
+        Ppred = np.zeros(Nd);  Pact = np.zeros(Nd);  Err = np.zeros(Nd)
         for k in range(0,Nd):
             minP = min((Model_Output_Resampled[k,:])); maxP = max((Model_Output_Resampled[k,:]))
             Ppred[k] = ((yhat_pred[0][k]*(maxP-minP) + minP))
             Pact[k] = ((ypred[i,k]*(maxP-minP) + minP))
-                        
             Err[k] = (abs(Ppred[k]-Pact[k])/abs(Pact[k])*100)
-                
+               
+        # Store Model Prediction and Error
         Yhat_pred[i,:] = Ppred
         Y_pred[i,:] = Pact
-
         error_pred[i] = np.average(Err)    #np.average(abs(yhat_test-ytest[i])/yhat_test*100)
         
     # Error in Predicting Training Data
@@ -177,25 +174,23 @@ def ModelRun():
     Y_train = np.zeros((len(xtrain[:,0]),n_outputs))
     Yhat_train = np.zeros((len(xtrain[:,0]),n_outputs))
     for i in range(0,len(xtrain[:,0])):
+        # Neural Network Prediction
         yhat_train = model.predict([xtrain[i,:].tolist()])
         
-        Ppred = np.zeros(Nd)
-        Pact = np.zeros(Nd)
-        Err = np.zeros(Nd)
+        # Rescale Output
+        Ppred = np.zeros(Nd);  Pact = np.zeros(Nd);  Err = np.zeros(Nd)
         for k in range(0,Nd):
             minP = min((Model_Output_Resampled[k,:])); maxP = max((Model_Output_Resampled[k,:]))
             Ppred[k] = ((yhat_train[0][k]*(maxP-minP) + minP))
             Pact[k] = ((ytrain[i,k]*(maxP-minP) + minP))
-                       
             Err[k] = (abs(Ppred[k]-Pact[k])/abs(Pact[k])*100)
                 
+        # Store Model Prediction and Error
         Yhat_train[i,:] = Ppred
         Y_train[i,:] = Pact
-
         error_train[i] = np.average(Err) 
         
-        
-    
+    # Store Error and R^2 
     Error[0] = np.average(error_train[:])
     Error[1] = np.average(error_test[:])
     Error[2] = np.average(error_pred[:])
@@ -203,7 +198,6 @@ def ModelRun():
     R2[0] = r2_score(ytrain, Yhat_train )
     R2[0] = r2_score(ytest, Yhat_test )
     R2[0] = r2_score(ypred, Yhat_pred )
-
 
     return error_test, Yhat_test, hist, R2,Error, Exp_Brain_Params, Exp_Brain_Fix_Params, model
 

@@ -1,6 +1,4 @@
 
-
-
 # =============================================================================
 # Import Libraries and Load Functions
 # =============================================================================
@@ -13,7 +11,6 @@ import keras
 import pickle
 import scipy.optimize as optimize
 import time
-import matplotlib.cm as cm
 
 current_dir = os.getcwd()
 func_files = current_dir[:-9] + 'functions'
@@ -35,21 +32,37 @@ from subfunctions_Analyze import *
 # =============================================================================
 # User Defined Parameters
 # =============================================================================
+# Define How the Data is Stored Either 'dict' or 'raw'
 Data_Type = 'dict'
-FileName = 'Test_Example_Dict'
+
+# Define Filename
+FileName = 'mouse_brain_data'
+
+# Define Material Model to Use Either 'neoHookean' or 'Gent'
+Mat_Mod = 'Gent'
+
+# Define RMSE Threshold
+Thresh = 1e-8
+
+# If Data_Type = 'raw' Define Sweep size (Xs, Ys)
+Xs = 3
+Ys = 3
+# If Data_Type = 'raw' Define Tissue Sample Size in meters
+Material_Width = 4e-3 # (m)
+Material_Thick = 4e-3 # (m)
+
+
+
+
+# Data_Type = 'dict'
+# FileName = 'Test_Example_Dict'
+# FileName = 'fixed_mouse_brain_data'
+# FileName = 'mouse_brain_data'
+
 
 # Data_Type = 'raw'
 # FileName = '1w 40 min_2_09.29.21'
 # DirName = 'Test_Example_Raw'
-Xs = 3
-Ys = 3
-Material_Width = 4e-3
-Material_Thick = 4e-3
-
-
-Thresh = 5e-8
-
-
 
 
 
@@ -58,9 +71,22 @@ Thresh = 5e-8
 # Load Experimental Data
 # =============================================================================
 if Data_Type == 'dict':
-    DataFile = exp_files + '\\%s.pkl'%(FileName)
+    DataFile = exp_files + '\\%s.pickle'%(FileName)
+    # DataFile = exp_files + '\\%s.pkl'%(FileName)
     ExpData = pickle.load(open(DataFile,'rb'))
     Keys = list( ExpData.keys() )
+
+    # Convert data to micron length scale
+    ExpData_new = {}
+    for n in range(len(ExpData)):
+        ExpData_new['Sample_%i'%(n)] = {'radius':(25e-6), 
+                                        'Height':40*(25e-6), 
+                                        'Width':40*(25e-6), 
+                                        'Load': ExpData[Keys[n]][4]*(1e-6), 
+                                        'Indentation':  ExpData[Keys[n]][3]*(1e-6) }
+    ExpData = ExpData_new
+    Keys = list( ExpData.keys() )
+
 
 elif Data_Type == 'raw':
     DataFile = exp_files + '\\%s\\%s 1 S-1 X-1 Y-1 I-1.txt'%(DirName,FileName)
@@ -82,7 +108,6 @@ model_NeoHookean_Forward = keras.models.load_model(nn_files + "\\NN_NeoHookean_F
 
 
 
-
 # =============================================================================
 # Extract Mouse and Brain Data, and Resample
 # =============================================================================
@@ -90,39 +115,64 @@ ExpData_u_Hertz, ExpData_u_ModHertz, ExpData_Load, ExpData_Dim, RMSE_Hertz, RMSE
 
 
 
-
-
 # =============================================================================
 #  Prepare Experimental Data for Direct Inverse Approach
 # =============================================================================
-Exp_Input, Scales =  Prepare_DirInv_ABFits_GT(ExpData,Keys,syn_files)
+if Mat_Mod == 'neoHookean':
+    Exp_Input_NH =  Prepare_DirInv_NH(ExpData,Keys,syn_files, ExpData_Load, ExpData_Dim)
+
+elif Mat_Mod == 'Gent':
+    Exp_Input_GT, Scales =  Prepare_DirInv_ABFits_GT(ExpData,Keys,syn_files)
+
+
 
 # =============================================================================
 # Direct Inverse ML Approach to Parameter Identification
 # =============================================================================
-Exp_Params_DirInv_GT = Direct_Inverse_ML_Approach_Gent_Data(model_Gent_Inverse_ABFits, Exp_Input, Scales,ExpData,Keys)
+if Mat_Mod == 'neoHookean':
+    Exp_Params_DirInv_NH = Direct_Inverse_ML_Approach_neoHookean_Data(model_NeoHookean_Inverse, Exp_Input_NH, ExpData, Keys)
+
+elif Mat_Mod == 'Gent':
+    Exp_Params_DirInv_GT = Direct_Inverse_ML_Approach_Gent_Data(model_Gent_Inverse_ABFits, Exp_Input_GT, Scales,ExpData,Keys)
+
+
 
 # =============================================================================
 # Calculate RMSE Using Forward Gent Model
 # =============================================================================
-Exp_Params_DirInv_GT, Fits_DirInv = RMSE_Approx(model_Gent_Forward,syn_files,ExpData_Dim,ExpData_Load, Exp_Params_DirInv_GT)
+if Mat_Mod == 'neoHookean':
+    Exp_Params_DirInv_NH, Fits_DirInv_NH = RMSE_Approx(model_Gent_Forward,syn_files,ExpData_Dim,ExpData_Load, Exp_Params_DirInv_NH, Scales)
+
+elif Mat_Mod == 'Gent':
+    Exp_Params_DirInv_GT, Fits_DirInv_GT = RMSE_Approx(model_Gent_Forward,syn_files,ExpData_Dim,ExpData_Load, Exp_Params_DirInv_GT, Scales)
+
+# Exp_Params_DirInv = CleanPredictions(Exp_Params_DirInv_GT, Exp_Params_DirInv_NH)
+
+
 
 # =============================================================================
 # Least Squares ML Approach to Increase Accuracy
 # =============================================================================
-Exp_Params_DirInv_GT  =  CleanDirectInversePrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim,ExpData_Load)
+if Mat_Mod == 'neoHookean':
+    Exp_Params_Lsq_NH, Fits_Lsq_NH  =  LeastSquaresPrediction_NH(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_NH, ExpData_Dim,ExpData_Load,Scales, Fits_DirInv_NH)
+
+elif Mat_Mod == 'Gent':
+    Exp_Params_Lsq_GT, Fits_Lsq_GT  =  LeastSquaresPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim,ExpData_Load,Scales, Fits_DirInv_GT)
 
 
-
+# Exp_Params_Lsq_GT_GN, Fits_Lsq_GT_GN  =  GaussNewtonMLPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim, ExpData_Load,Scales, Fits_DirInv_GT)
 
 
 # =============================================================================
 # Plotting
 # =============================================================================
-Plot(ExpData,Fits_DirInv,Exp_Params_DirInv_GT)
-np.savetxt('%s\\%s_MaterialParameters.txt'%(res_files,FileName), Exp_Params_DirInv_GT)
+if Mat_Mod == 'neoHookean':
+    Plot(ExpData, Fits_Lsq_NH, Exp_Params_Lsq_NH)
 
+elif Mat_Mod == 'Gent':
+    Plot(ExpData, Fits_Lsq_GT, Exp_Params_Lsq_GT)
 
+# np.savetxt('%s\\%s_MaterialParameters.txt'%(res_files,FileName), Exp_Params_DirInv_GT)
 
 
 

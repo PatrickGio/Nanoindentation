@@ -34,14 +34,11 @@ from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import LeakyReLU
 import time
-import scipy.optimize as optimize
 from sklearn.metrics import r2_score
-import matplotlib.cm as cm
 import tensorflow as tf
 from sklearn.model_selection import RepeatedKFold
 from sklearn.model_selection import train_test_split
 from keras import layers, initializers
-
 from sklearn.metrics import r2_score
 import pickle
 import sys
@@ -55,6 +52,7 @@ syn_files = current_dir[:] + '\\data\\SynthData'
 sys.path.append(nn_files)
 sys.path.append(func_files)
 
+# Import Useful Functions
 from subfunctions_training_Gent_Inverse import *
 
 
@@ -129,19 +127,23 @@ def ModelRun(xtrain, ytrain, xtest, ytest, xpred, ypred ):
     error_test = np.zeros((len(xtest[:,0]),n_outputs))
     Yhat_test = np.zeros((len(xtest[:,0]),n_outputs))
     
+    # Feature Scales
     minU = 2; maxU = 6
     minJ = min(Model_Input[:,3]); maxJ = max(Model_Input[:,3])
     for i in range(0,len(xtest[:,0])):
+        # Neural Network Prediction
         yhat_test = model.predict([xtest[i,:].tolist()])
         Yhat_test[i] = yhat_test
         
+        # Rescale Output
         u_pred = 10**( ((yhat_test[0][0]/1 + 0.0 ) * (maxU - minU)*1)  + minU )
         Jm_pred = ((yhat_test[0][1]/1 + 0.0 ) * (maxJ - minJ)*1)  + minJ
         u_act = 10**( ((ytest[i,0]/1 + 0.0 ) * (maxU - minU)*1)  + minU )
         Jm_act = ((ytest[i,1]/1 + 0.0 ) * (maxJ - minJ)*1)  + minJ
+        
+        # Calculate Error in Prediction
         error_test_scaled[i,0] = (abs(u_pred-u_act)/abs(u_act)*100)
         error_test_scaled[i,1] = (abs(Jm_pred-Jm_act)/abs(Jm_act)*100)
-        
         error_test[i,0] = error_test_scaled[i,0]
         error_test[i,1] = error_test_scaled[i,1]
         
@@ -152,16 +154,19 @@ def ModelRun(xtrain, ytrain, xtest, ytest, xpred, ypred ):
     Yhat_pred = np.zeros((len(xtrain[:,0]),n_outputs))
 
     for i in range(0,len(xpred[:,0])):
+        # Neural Network Prediction
         yhat_pred = model.predict([xpred[i,:].tolist()])
         Yhat_pred[i] = yhat_pred
         
+        # Rescale Output
         u_pred = 10**( ((yhat_pred[0][0]/1 + 0.0 ) * (maxU - minU)*1)  + minU )
         Jm_pred = ((yhat_pred[0][1]/1 + 0.0 ) * (maxJ - minJ)*1)  + minJ
         u_act = 10**( ((ypred[i,0]/1 + 0.0 ) * (maxU - minU)*1)  + minU )
         Jm_act = ((ypred[i,1]/1 + 0.0 ) * (maxJ - minJ)*1)  + minJ
+        
+        # Calculate Error in Test
         error_pred_scaled[i,0] = (abs(u_pred-u_act)/abs(u_act)*100)
         error_pred_scaled[i,1] = (abs(Jm_pred-Jm_act)/abs(Jm_act)*100)
-        
         error_pred[i,0] = error_pred_scaled[i,0]
         error_pred[i,1] = error_pred_scaled[i,1]
         
@@ -172,16 +177,19 @@ def ModelRun(xtrain, ytrain, xtest, ytest, xpred, ypred ):
     Yhat_train = np.zeros((len(xtrain[:,0]),n_outputs))
 
     for i in range(0,len(xtrain[:,0])):
+        # Neural Network Prediction
         yhat_train = model.predict([xtrain[i,:].tolist()])
         Yhat_train[i] = yhat_train
         
+        # Rescale Output
         u_pred = 10**( ((yhat_train[0][0]/1 + 0.0 ) * (maxU - minU)*1)  + minU )
         Jm_pred = ((yhat_train[0][1]/1 + 0.0 ) * (maxJ - minJ)*1)  + minJ
         u_act = 10**( ((ytrain[i,0]/1 + 0.0 ) * (maxU - minU)*1)  + minU )
         Jm_act = ((ytrain[i,1]/1 + 0.0 ) * (maxJ - minJ)*1)  + minJ
+        
+        # Calculate Error in Training Data
         error_train_scaled[i,0] = (abs(u_pred-u_act)/abs(u_act)*100)
         error_train_scaled[i,1] = (abs(Jm_pred-Jm_act)/abs(Jm_act)*100)
-        
         error_train[i,0] = error_train_scaled[i,0] 
         error_train[i,1] = error_train_scaled[i,1]
     
