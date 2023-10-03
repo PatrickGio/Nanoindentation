@@ -36,7 +36,7 @@ from subfunctions_Analyze import *
 Data_Type = 'dict'
 
 # Define Filename
-FileName = 'mouse_brain_data'
+FileName = 'fixed_mouse_brain_data'
 
 # Define Material Model to Use Either 'neoHookean' or 'Gent'
 Mat_Mod = 'Gent'
@@ -86,6 +86,18 @@ if Data_Type == 'dict':
                                         'Indentation':  ExpData[Keys[n]][3]*(1e-6) }
     ExpData = ExpData_new
     Keys = list( ExpData.keys() )
+    
+    
+    # filename = 'data_fixed_mouse_brain'
+    # file = '%s.pickle'%(filename)
+    # with open(file, 'wb') as fp:
+    #     pickle.dump(ExpData, fp)
+    #     print('dictionary saved successfully to file')
+    
+
+
+
+
 
 
 elif Data_Type == 'raw':

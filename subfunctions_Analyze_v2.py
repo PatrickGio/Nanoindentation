@@ -4,11 +4,20 @@ import scipy.optimize as optimize
 import math as ma
 from scipy.signal import argrelmax
 from scipy.ndimage.filters import gaussian_filter1d
+import os
+from lmfit import Parameters,minimize, fit_report
+
+
+    
 
 
 def Fit_model(inputs, a, b):
     x = (inputs[:])
     return  a*(x)**b
+
+def Fit_model_Residual(params, x, y):
+    a, b  =  params['a'], params['b']
+    return (a*x**b) - y
 
 def Hertz(inputs, a):
     x = (inputs[:])
@@ -21,7 +30,7 @@ def ModHertz(inputs, a):
 
 
 
-def ExtractData_HertzFits(ExpData,Keys):
+def ExtractData_HertzFits(ExpData, Keys):
     """
     Objective
         Extract experimental data and resample
@@ -55,16 +64,16 @@ def ExtractData_HertzFits(ExpData,Keys):
     Nd = 100 
     
     # Arrays to store the loading curves, sample dimensions, and indenter radii 
-    ExpData_Load_Fit = np.zeros((Ndat, Nd))
-    ExpData_Load = np.zeros((Ndat, Nd))
-    ExpData_Dim = np.zeros((Ndat, 2))
-    ExpData_Rad = np.zeros((Ndat))
+    ExpData_Load_Fit = np.zeros((Ndat, Nd), dtype=float)
+    ExpData_Load     = np.zeros((Ndat, Nd), dtype=float)
+    ExpData_Dim      = np.zeros((Ndat, 2), dtype=float)
+    ExpData_Rad      = np.zeros((Ndat), dtype=float)
 
     # Loop over samples 
     for i in range(0,Ndat):
         # Extract data
-        ExpData_Rad[i] = ExpData[Keys[i]]['radius']
-        ExpData_Dim[i,0] = ExpData[Keys[i]]['Width']/ExpData[Keys[i]]['radius']
+        ExpData_Rad[i]   = ExpData[Keys[i]]['radius']
+        ExpData_Dim[i,0] = ExpData[Keys[i]]['Width' ]/ExpData[Keys[i]]['radius']
         ExpData_Dim[i,1] = ExpData[Keys[i]]['Height']/ExpData[Keys[i]]['radius']
         if ExpData_Dim[i,0] > 40: ExpData_Dim[i,0] = 40
         if ExpData_Dim[i,1] > 40: ExpData_Dim[i,1] = 40
@@ -77,37 +86,37 @@ def ExtractData_HertzFits(ExpData,Keys):
         newp, pcov_new = optimize.curve_fit(Fit_model, abs(disp), load ,ftol=1e-15, xtol=1e-15, maxfev=800000 )
         
         ExpData_Load_Fit[i,:] = newp[0]*xi**newp[1]
-        ExpData_Load[i,:] = np.interp(xi_clip, disp, load)[:]
+        ExpData_Load[i,:]     = np.interp(xi_clip, disp, load)[:]
 
-        
         
     # Averaged Experimental Data
     ExpData_Load_Avg = np.average(ExpData_Load_Fit,axis=0)
-    ExpData_W_Avg = np.average(ExpData_Dim[:,0])
-    ExpData_H_Avg = np.average(ExpData_Dim[:,1])
-    ExpData_R_Avg = np.average(ExpData_Rad[:])
+    ExpData_W_Avg    = np.average(ExpData_Dim[:,0])*ExpData[Keys[0]]['radius']
+    ExpData_H_Avg    = np.average(ExpData_Dim[:,1])*ExpData[Keys[0]]['radius']
+    ExpData_R_Avg    = np.average(ExpData_Rad[:])
     ExpData['Averaged'] = {'radius':ExpData_R_Avg, 'Height':ExpData_H_Avg, 'Width':ExpData_W_Avg, 'Load':ExpData_Load_Avg, 'Indentation': xi*ExpData_R_Avg}
     
     # include averaged data
-    Keys = list( ExpData.keys() )
+    Keys = list(ExpData.keys())
     Ndat = len(ExpData)
     ExpData_Load_Fit = np.append(ExpData_Load_Fit, np.array([ExpData_Load_Avg]), axis=0)
     ExpData_Dim = np.append(ExpData_Dim, np.array([[ExpData_W_Avg, ExpData_H_Avg]]), axis=0  )
 
     # Find Hertzian and Modified Hertzian fits for all data samples
-    ExpData_u_Hertz = np.zeros((Ndat, 1)); ExpData_E_Hertz = np.zeros((Ndat, 1))
-    ExpData_u_ModHertz = np.zeros((Ndat, 1)); ExpData_E_ModHertz = np.zeros((Ndat, 1))
-    RMSE_Hertz = np.zeros(Ndat)
-    RMSE_ModHertz = np.zeros(Ndat)
-    for i in range(0,Ndat):
+    ExpData_u_Hertz    = np.zeros((Ndat, 1), dtype=float);  ExpData_E_Hertz    = np.zeros((Ndat, 1), dtype=float)
+    ExpData_u_ModHertz = np.zeros((Ndat, 1), dtype=float);  ExpData_E_ModHertz = np.zeros((Ndat, 1), dtype=float)
+    RMSE_Hertz         = np.zeros((Ndat), dtype=float)
+    RMSE_ModHertz      = np.zeros((Ndat), dtype=float)
+    
+    for i in range(Ndat):
         # Extract Data
         radius = ExpData[Keys[i]]['radius']
-        disp = ExpData[Keys[i]]['Indentation']/radius
-        load = ExpData[Keys[i]]['Load']
+        disp   = ExpData[Keys[i]]['Indentation']/radius
+        load   = ExpData[Keys[i]]['Load']
                 
         # Find Fits
-        newp_h, pcov_new = optimize.curve_fit(Hertz, abs(disp)*radius, load[:], ftol=1e-15, xtol=1e-15, maxfev=800000 )
-        newp_mh, pcov_new = optimize.curve_fit(ModHertz, abs(disp)*radius,  load[:],ftol=1e-15, xtol=1e-15, maxfev=800000 )
+        newp_h,  pcov_new = optimize.curve_fit(Hertz,    abs(disp)*radius, load[:], ftol=1e-15, xtol=1e-15, maxfev=800000 )
+        newp_mh, pcov_new = optimize.curve_fit(ModHertz, abs(disp)*radius, load[:], ftol=1e-15, xtol=1e-15, maxfev=800000 )
         
         # Calculate Effective Youngs Modulus
         nu = 0.4995
@@ -115,14 +124,14 @@ def ExtractData_HertzFits(ExpData,Keys):
         Eff_mh = (newp_mh*3/4/np.sqrt(25e-6))
         
         # Calculate Shear Modulus and Youngs Modulus
-        ExpData_u_Hertz[i] = (Eff_h*(1-nu**2))   /(2+2*nu) #*((radius*unit_rad)**2)/((25e-6)**2)
-        ExpData_E_Hertz[i] = Eff_h
+        ExpData_u_Hertz[i]    = (Eff_h*(1-nu**2))   /(2+2*nu) #*((radius*unit_rad)**2)/((25e-6)**2)
+        ExpData_E_Hertz[i]    = Eff_h
         ExpData_u_ModHertz[i] = newp_mh/(2+2*nu) # / ( ((radius*unit_rad)**2)/((25e-6)**2) )
         ExpData_E_ModHertz[i] = Eff_mh
     
         # Find RMSE between the Hertzian Fits and Data
-        RMSE_Hertz[i] = np.sqrt(np.square( np.subtract(ExpData_Load_Fit[i,:], Hertz(xi*radius, newp_h[0])  ) )).mean() 
-        RMSE_ModHertz[i] = np.sqrt(np.square( np.subtract(ExpData_Load_Fit[i,:], ModHertz(xi*radius, newp_mh[0])  ))).mean() 
+        RMSE_Hertz[i]    = np.sqrt(np.square( np.subtract(ExpData_Load_Fit[i,:], Hertz(xi*radius,    newp_h[0])  ) )).mean() 
+        RMSE_ModHertz[i] = np.sqrt(np.square( np.subtract(ExpData_Load_Fit[i,:], ModHertz(xi*radius, newp_mh[0]) ) )).mean() 
         
     return ExpData_u_Hertz, ExpData_u_ModHertz, ExpData_Load_Fit, ExpData_Dim, RMSE_Hertz, RMSE_ModHertz, ExpData,Keys
     
@@ -130,7 +139,7 @@ def ExtractData_HertzFits(ExpData,Keys):
 
 
 
-def Prepare_DirInv_NH(ExpData,Keys,syn_files, ExpData_Load, ExpData_Dim):
+def Prepare_DirInv_NH(ExpData, Keys, syn_files, ExpData_Load, ExpData_Dim):
     """
     Objective
         Prepare and reshape data for direct inverse ML approach trained with the 
@@ -157,41 +166,66 @@ def Prepare_DirInv_NH(ExpData,Keys,syn_files, ExpData_Load, ExpData_Dim):
 
     """
     # Load synthetic data
-    Model_Output = np.loadtxt(syn_files + "\\Model_Output_NH")
-    Model_Input  = np.loadtxt(syn_files + "\\Model_Input_NH")
+    Model_Output = np.loadtxt(os.path.join(syn_files, "Model_Output_NH"))
+    Model_Input  = np.loadtxt(os.path.join(syn_files, "Model_Input_NH"))
     
     Nd = 100
-    Nx= len(Model_Output[:,0])
-    Nsamp= len(Model_Output[0,:])
-    Ndat = len(ExpData)
+    Nx = len(Model_Output[:,0])
+    Nsamp = len(Model_Output[0,:])
+    Ndat  = len(ExpData)
     
-    # Resample Synthetic Data
-    FEA_disp = np.linspace(0,0.5,int(Nx+1))[1:]
-    Model_Output_Resampled = np.zeros((Nd, Nsamp))
-    for i in range(0,Nsamp):
-        # Fitting and Resample
-        FEA_Load = Model_Output[:,i]
-        newp, pcov_new = optimize.curve_fit( Fit_model, FEA_disp, FEA_Load, ftol=1e-15, xtol=1e-15, maxfev=800000)
-        xi = np.linspace(0, 0.5, Nd+1 )[1:]
-        Model_Output_Resampled[:,i] = Fit_model(xi,*newp)
 
-    # Create and Scale Neural Network Features
-    Exp_Input = np.zeros((Ndat,2+Nd))
-    minw = np.min(ExpData_Dim[:,0]);  maxw = np.max(ExpData_Dim[:,0])
-    minh = np.min(ExpData_Dim[:,1]);  maxh = np.max(ExpData_Dim[:,1])
+    # =========================================================================
+    #   Fit Power Function to Data
+    # =========================================================================
+    nparams = 2
+    Exp_Brain_fit_params = np.zeros((Ndat,nparams), dtype=float)        
+    for i in range(Ndat):
+        radius = ExpData[Keys[i]]['radius']
+        disp   = ExpData[Keys[i]]['Indentation']/radius
+        load   = ExpData[Keys[i]]['Load']*(1e6)
+                
+        # Define power function parameter boundaries
+        params = Parameters()
+        params.add('a', min = 0.19474610434626521, max = 3169.954257406464)
+        params.add('b', min = 1.3407204757759823,  max = 1.4858119560562033)
+
+        # Fit Power Function
+        fitted_params = minimize(Fit_model_Residual, params, args=(disp,load,), method='least_squares')
+        a, b  =  fitted_params.params['a'].value, fitted_params.params['b'].value
+        Exp_Brain_fit_params[i,:] = np.array([a,b])
+
+    minA, maxA  =  np.log10(0.19474610434626521), np.log10(3169.954257406464)
+    minB, maxB  =  1.3407204757759823, 1.4858119560562033
+    
+    
+    # =========================================================================
+    #   Scale Features for Experimental Prediction
+    # =========================================================================
+    # Neural Network Input
+    Exp_Input   =  np.zeros((Ndat,2+2), dtype=float)
+    
+    # Sample Width and Height
+    minw, maxw  =  np.min(ExpData_Dim[:,0]), np.max(ExpData_Dim[:,0])
     if minw == maxw: Exp_Input[:,0] =  1
-    else:  Exp_Input[:,0] =  ((np.copy(ExpData_Dim[:,0]) - minw)/(maxw - minw)*1 - 0) * 1
+    else:            Exp_Input[:,0] =  ((np.copy(ExpData_Dim[:,0]) - minw)/(maxw - minw)*1 - 0) * 1
+    minh, maxh  =  np.min(ExpData_Dim[:,1]), np.max(ExpData_Dim[:,1])
     if minh == maxh: Exp_Input[:,1] =  1
-    else:  Exp_Input[:,1] =  ((np.copy(ExpData_Dim[:,1]) - minh)/(maxh - minh)*1 - 0) * 1
-    for i in range(0,Nd):
-        minP = min(Model_Output_Resampled[i,:]); maxP = max(Model_Output_Resampled[i,:])
-        Exp_Input[:,i+2] =  ((np.copy(ExpData_Load[:,i]) - minP)/(maxP - minP)*1 - 0) * 1
+    else:            Exp_Input[:,1] =  ((np.copy(ExpData_Dim[:,1]) - minh)/(maxh - minh)*1 - 0) * 1
+
+    # Scale power function parameters
+    Exp_Input[:,2] =  ((np.log10(np.copy(Exp_Brain_fit_params[:,0])) - minA)/(maxA - minA)*1 - 0.0) * 1
+    Exp_Input[:,3] =  ((np.copy(Exp_Brain_fit_params[:,1]) - minB)/(maxB - minB)*1 - 0.0) * 1
         
-    return Exp_Input
+    minU, maxU  =  min(np.log10(Model_Input[:,2])), max(np.log10(Model_Input[:,2]))
+    minP, maxP  =  np.zeros(Nd), np.zeros(Nd)
+    for i in range(0,20):
+        minP[i] = min(Model_Output[i,:]); maxP[i] = max(Model_Output[i,:])
+        
+    Scales = {'minw':minw, 'maxw':maxw,'minh':minh, 'maxh':maxh,'minA':minA, 'maxA':maxA, 'minB':minB, 'maxB':maxB, 'minU':minU, 'maxU':maxU, 'minP':minP, 'maxP':maxP}        
 
 
-
-
+    return Exp_Input, Scales
 
 
 
@@ -221,21 +255,20 @@ def Prepare_DirInv_ABFits_GT(ExpData, Keys, syn_files):
 
     """
     
-    # =============================================================================
-    # Scale Features for Experimental Prediction
-    # =============================================================================
+    # =========================================================================
+    #   Resample Data and Determine Scales
+    # =========================================================================
     # Load synthetic data
-    Model_Output = np.loadtxt(syn_files + "\\Model_Output_ExtraSmallJm")
-    Model_Input = np.loadtxt(syn_files + "\\Model_Input_ExtraSmallJm")
+    Model_Output = np.loadtxt(os.path.join(syn_files, "Model_Output_ExtraSmallJm"))
+    Model_Input  = np.loadtxt(os.path.join(syn_files, "Model_Input_ExtraSmallJm"))
     
     nparams = 2; Nd = 100;  Ndat = len(ExpData)
-    Nx= len(Model_Output[:,0])
-    Nsamp= len(Model_Output[0,:])
+    Nx, Nsamp  =  Model_Output.shape
     
     # Resampling of Synthetic Loading Curves
-    FEA_disp = np.linspace(0,0.5,int(Nx+1))[1:]
+    FEA_disp       = np.linspace(0,0.5,int(Nx+1))[1:]
     FEA_fit_params = np.zeros((Nsamp,nparams))
-    Model_Output_Resampled = np.zeros((Nd, Nsamp))
+    Model_Output_Resampled = np.zeros((Nd, Nsamp), dtype=float)
     for i in range(0,Nsamp):
         FEA_Load = Model_Output[:,i]
         newp, pcov_new = optimize.curve_fit( Fit_model, FEA_disp, FEA_Load, ftol=1e-15, xtol=1e-15, maxfev=800000)
@@ -244,23 +277,25 @@ def Prepare_DirInv_ABFits_GT(ExpData, Keys, syn_files):
         Model_Output_Resampled[:,i] = Fit_model(xi,*newp)
         
     # Create Scales for Scaling NN Input Features and Output
-    minA = min(np.log10(FEA_fit_params[:,0])); maxA = max(np.log10(FEA_fit_params[:,0]))
-    minw = min(Model_Input[:,0]); maxw = max(Model_Input[:,0])
-    minh = min(Model_Input[:,1]); maxh = max(Model_Input[:,1])
-    minB = min(FEA_fit_params[:,1]); maxB = max(FEA_fit_params[:,1])
-    minU = 2; maxU = 6
+    minA, maxA  =  min(np.log10(FEA_fit_params[:,0])), max(np.log10(FEA_fit_params[:,0]))
+    minw, maxw  =  min(Model_Input[:,0]), max(Model_Input[:,0])
+    minh, maxh  =  min(Model_Input[:,1]), max(Model_Input[:,1])
+    minB, maxB  =  min(FEA_fit_params[:,1]), max(FEA_fit_params[:,1])
+    minU, maxU  =  2, 6
     # minJ = min(Model_Input[:,3]); maxJ = max(Model_Input[:,3])
-    minJ = min(np.log10(Model_Input[:,3])); maxJ = max(np.log10(Model_Input[:,3]))
-    minP = np.zeros(Nd); maxP = np.zeros(Nd)
+    minJ, maxJ  =  min(np.log10(Model_Input[:,3])), max(np.log10(Model_Input[:,3]))
+    minP, maxP  =  np.zeros(Nd), np.zeros(Nd)
     for i in range(0,Nd):
         minP[i] = min(np.log10(Model_Output_Resampled[i,:])); maxP[i] = max(np.log10(Model_Output_Resampled[i,:]))
         
     Scales = {'minw':minw, 'maxw':maxw,'minh':minh, 'maxh':maxh,'minA':minA, 'maxA':maxA, 'minB':minB, 'maxB':maxB, 'minU':minU, 'maxU':maxU, 'minJ':minJ, 'maxJ':maxJ, 'minP':minP, 'maxP':maxP}        
         
 
-    
-    Exp_fit_params = np.zeros((Ndat,nparams))
-    ExpData_Dim = np.zeros((Ndat, 2))
+    # =========================================================================
+    #   Find Parameter Fits
+    # =========================================================================
+    Exp_fit_params = np.zeros((Ndat,nparams), dtype=float)
+    ExpData_Dim    = np.zeros((Ndat, 2),      dtype=float)
     for i in range(0,Ndat):
         # Extract Information from Experimental Data
         radius = ExpData[Keys[0]]['radius']
@@ -272,26 +307,33 @@ def Prepare_DirInv_ABFits_GT(ExpData, Keys, syn_files):
         # Fit Experimental Loading Curves
         disp = ExpData[Keys[i]]['Indentation']/radius
         load = ExpData[Keys[i]]['Load']
-        mxdisp = max(disp)
-        xi = np.linspace(0, 0.5, Nd+1 )[1:]; xi_clip = np.copy(xi); xi_clip[xi_clip  >=  mxdisp] = 0
+
+        xi = np.linspace(0, 0.5, Nd+1 )[1:]; xi_clip = np.copy(xi); xi_clip[xi_clip  >=  max(disp)] = 0
         newp, pcov_new = optimize.curve_fit(Fit_model, abs(disp), load, ftol=1e-15, xtol=1e-15, maxfev=800000 )
         
         # Store the parameters of fit
         Exp_fit_params[i,:] = newp
         fit = newp[0]*xi_clip**newp[1]
 
+
+    # =========================================================================
+    #   Scale Features for Neural Network Input
+    # =========================================================================
     # Scale Neural Network Features
-    Exp_Input = np.zeros((Ndat, 4))
-    minw = np.min(ExpData_Dim[:,0]);  maxw = np.max(ExpData_Dim[:,0])
-    minh = np.min(ExpData_Dim[:,1]);  maxh = np.max(ExpData_Dim[:,1])
+    Exp_Input = np.zeros((Ndat, 4), dtype=float)
+    
     # Spatial Features
-    if minw == maxw: Exp_Input[:,0] =  1
-    else:  Exp_Input[:,0] =  ((np.copy(ExpData_Dim[:,0]) - minw)/(maxw - minw)*1 - 0) * 1
-    if minh == maxh: Exp_Input[:,1] =  1
-    else:  Exp_Input[:,1] =  ((np.copy(ExpData_Dim[:,1]) - minh)/(maxh - minh)*1 - 0) * 1
+    minw, maxw  =  np.min(ExpData_Dim[:,0]), np.max(ExpData_Dim[:,0])
+    if minw == maxw: Exp_Input[:,0] = 1
+    else:            Exp_Input[:,0] = ((np.copy(ExpData_Dim[:,0]) - minw)/(maxw - minw)*1 - 0) * 1
+    minh, maxh  =  np.min(ExpData_Dim[:,1]), np.max(ExpData_Dim[:,1])
+    if minh == maxh: Exp_Input[:,1] = 1
+    else:            Exp_Input[:,1] = ((np.copy(ExpData_Dim[:,1]) - minh)/(maxh - minh)*1 - 0) * 1
+    
     # y=a*x^b Fit Features
-    Exp_Input[:,2] =  ((np.log10(np.copy(Exp_fit_params[:,0])) - minA)/(maxA - minA)*1 - 0.0) * 1
-    Exp_Input[:,3] =  ((np.copy(Exp_fit_params[:,1]) - minB)/(maxB - minB)*1 - 0.0) * 1
+    Exp_Input[:,2] = ((np.log10(np.copy(Exp_fit_params[:,0])) - minA)/(maxA - minA)*1 - 0.0) * 1
+    Exp_Input[:,3] = ((np.copy(Exp_fit_params[:,1]) - minB)/(maxB - minB)*1 - 0.0) * 1
+    
     
     return Exp_Input, Scales
 
@@ -300,17 +342,7 @@ def Prepare_DirInv_ABFits_GT(ExpData, Keys, syn_files):
 
 
 
-
-
-
-
-
-
-# =============================================================================
-# Direct Inverse ML Approach to Parameter Identification
-# =============================================================================
-
-def Direct_Inverse_ML_Approach_neoHookean_Data(model_NeoHookean_Inverse, Exp_Input, ExpData, Keys):
+def Direct_Inverse_ML_Approach_neoHookean_Data(model_NeoHookean_Inverse, Exp_Input, Scales, ExpData, Keys):
     """
     Objective
         Solve the inverse problem for parameter identification with the direct
@@ -335,13 +367,14 @@ def Direct_Inverse_ML_Approach_neoHookean_Data(model_NeoHookean_Inverse, Exp_Inp
 
     """
         
-    Exp_Params = np.zeros((len(Exp_Input[:,0]),2 ))
+    Exp_Params = np.zeros((len(Exp_Input[:,0]),2 ), dtype=float)
     
     for i in range(0,len(Exp_Input[:,0])):
         # Predict Shear Modulus
         yhat = model_NeoHookean_Inverse.predict([Exp_Input[i,:].tolist()]);
         # Re-dimensionalize 
-        Exp_Params[i,0] = (yhat / ((ExpData[Keys[i]]['radius'])**2  / (25e-6)**2 )  ) 
+        u_pred = 10**( ((yhat[0][0]/1 + 0.0 ) * (Scales['maxU'] - Scales['minU'])*1)  + Scales['minU'] )
+        Exp_Params[i,0] = (u_pred / ((ExpData[Keys[i]]['radius'])**2 / (25e-6)**2 )  ) 
         # Not Necessary, Stores 10 as the max Jm value
         Exp_Params[i,1] = 10
 
@@ -375,8 +408,8 @@ def Direct_Inverse_ML_Approach_Gent_Data(model_Gent_Inverse_ABFits, Exp_Input, S
         Identified material parameters.
 
     """
-    Exp_Params_Scaled = np.zeros((len(Exp_Input[:,0]),2 ))
-    Exp_Params = np.zeros((len(Exp_Input[:,0]),2 ))
+    Exp_Params_Scaled = np.zeros((len(Exp_Input[:,0]),2 ), dtype=float)
+    Exp_Params        = np.zeros((len(Exp_Input[:,0]),2 ), dtype=float)
     
     for i in range(0,len(Exp_Input[:,0])):
         # Predict the Shear Modulus and the Parameter Jm
@@ -386,7 +419,7 @@ def Direct_Inverse_ML_Approach_Gent_Data(model_Gent_Inverse_ABFits, Exp_Input, S
         Exp_Params_Scaled[i] = (yhat / ((ExpData[Keys[i]]['radius'])**2  / (25e-6)**2 )  ) 
         Exp_Params[i,0] = 10**( ((Exp_Params_Scaled[i,0]/1 + 0.0 ) * (Scales['maxU'] - Scales['minU'])*1)  + Scales['minU'] )
         # Exp_Params[i,1] = 1*(((Exp_Params_Scaled[i,1]/1 + 0.0 ) * (Scales['maxJ'] - Scales['minJ'])*1)  + Scales['minJ'])
-        Exp_Params[i,1] = 10**(((Exp_Params_Scaled[i,1]/1 + 0.0 ) * (Scales['maxJ'] - Scales['minJ'])*1)  + Scales['minJ'])
+        Exp_Params[i,1] = 10**( ((Exp_Params_Scaled[i,1]/1 + 0.0 ) * (Scales['maxJ'] - Scales['minJ'])*1)  + Scales['minJ'] )
     
     # Ensure the Model Doesn't try to Predict to Far Out of The Trained 
     # Parameter Space
@@ -397,14 +430,6 @@ def Direct_Inverse_ML_Approach_Gent_Data(model_Gent_Inverse_ABFits, Exp_Input, S
     
     return Exp_Params_Cl
     
-
-
-
-
-
-
-
-
 
 
 
@@ -520,7 +545,7 @@ def CleanPredictions( Exp_Params_1, Exp_Params_2):
 
 
 
-def LeastSquaresPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim, ExpData_Load, Scales, Fits_DirInv):
+def LeastSquaresPrediction_GT(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim, ExpData_Load, Scales, Fits_DirInv):
     """
     Objective
         Use the material parameters identified by the direct inverse ML model 
@@ -556,13 +581,11 @@ def LeastSquaresPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_Dir
         Stored loading curves produced from material parameters.
     """
     
+    lower_bound = -0.05
+    upper_bound = 1.05
+    
     # Ensure that none of the identified paramters fall too far out of the 
     # trained parameter space
-    Exp_Params_DirInv_GT_Lsq_GT = np.copy(Exp_Params_DirInv_GT)
-    Exp_Params_DirInv_GT_Lsq_GT[Exp_Params_DirInv_GT_Lsq_GT[:, 0]<=25 ,0] = 25  
-    Exp_Params_DirInv_GT_Lsq_GT[Exp_Params_DirInv_GT_Lsq_GT[:, 1]<=0.0025 ,1] = 0.0025  
-    Exp_Params_DirInv_GT_Lsq_GT[Exp_Params_DirInv_GT_Lsq_GT[:, 1]>=10 ,1] = 10  
-
     Nd = 100;  Ndat = len(ExpData_Dim[:,0])
     xi = np.linspace(0, 0.5, Nd+1 )[1:]
     
@@ -582,7 +605,8 @@ def LeastSquaresPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_Dir
         return  Ppred
             
     # Run Iterative Least Squares Model
-    Fits_DirInv_Lsq_Fix = np.copy(Fits_DirInv)
+    Exp_Params_DirInv_GT_Lsq_GT = np.copy(Exp_Params_DirInv_GT)
+    Fits_DirInv_Lsq_Fix         = np.copy(Fits_DirInv)
     for K in range(0,Ndat):
         if Exp_Params_DirInv_GT_Lsq_GT[K,2] >= Thresh:
             # Load-Displacement Data
@@ -605,17 +629,22 @@ def LeastSquaresPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_Dir
                 Ppred = np.zeros(Nd);  ppred =  np.interp(xi, np.linspace(0,0.5,len(yhat_test[0][:])+1)[1:], yhat_test[0][:])[:]
                 for k in range(0,Nd):
                     Ppred[k] = 10**((ppred[k]*(Scales['maxP'][k] - Scales['minP'][k]) + Scales['minP'][k]))
-                        
+                    
                 return  Ppred
             
             # Initial Guess for Iterative Least Squares Method
             x0 =  np.copy(Exp_Params_DirInv_GT_Lsq_GT[K,:])
-            x0[0] =  (np.log10(np.copy(Exp_Params_DirInv_GT_Lsq_GT[K,0]))-Scales['minU'])/(Scales['maxU'] - Scales['minU'])
-            x0[1] =  (np.log10(np.copy(Exp_Params_DirInv_GT_Lsq_GT[K,1]))-Scales['minJ'])/(Scales['maxJ'] - Scales['minJ']) 
+            x0[0] = (np.log10(np.copy(Exp_Params_DirInv_GT_Lsq_GT[K,0]))-Scales['minU'])/(Scales['maxU'] - Scales['minU'])
+            x0[1] = (np.log10(np.copy(Exp_Params_DirInv_GT_Lsq_GT[K,1]))-Scales['minJ'])/(Scales['maxJ'] - Scales['minJ']) 
+            x0[0], x0[1]  =  np.min([x0[0], upper_bound]), np.min([x0[1], upper_bound])
+            x0[0], x0[1]  =  np.max([x0[0], lower_bound]), np.max([x0[1], lower_bound])
             
             # Run Optimizer
             try:
-                Lsq_params, pcov_neww = optimize.curve_fit(LSQ_Func, LSQ_Disp,LSQ_Load,p0=(x0[0], x0[1]), bounds = ([-0.25,-0.25],[1.25,1.25]),ftol = 1e-15, xtol = 1e-15,maxfev=200)
+                Lsq_params, pcov_neww = optimize.curve_fit(LSQ_Func, LSQ_Disp, LSQ_Load, p0=(x0[0], x0[1]), 
+                                                           bounds = ([lower_bound, lower_bound], [upper_bound, upper_bound]),
+                                                           ftol = 1e-15, xtol = 1e-15, maxfev=200)
+                # Lsq_params, pcov_neww = optimize.curve_fit(LSQ_Func, LSQ_Disp,LSQ_Load,p0=(x0[0], x0[1]), bounds = ([-0.25,-0.25],[1.25,1.25]),ftol = 1e-15, xtol = 1e-15,maxfev=200)
             except RuntimeError:
                 print("Error - curve_fit failed")
                        
@@ -640,34 +669,22 @@ def LeastSquaresPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_Dir
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 def LeastSquaresPrediction_NH(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim,ExpData_Load,Scales,Fits_DirInv):
+    
     Exp_Params_DirInv_GT_Cl = np.copy(Exp_Params_DirInv_GT)
     Exp_Params_DirInv_GT_Cl[Exp_Params_DirInv_GT_Cl[:, 0]<=25 ,0] = 25  
     Exp_Params_DirInv_GT_Cl[Exp_Params_DirInv_GT_Cl[:, 1]<=0.0025 ,1] = 0.0025  
     Exp_Params_DirInv_GT_Cl[Exp_Params_DirInv_GT_Cl[:, 1]>=10 ,1] = 10  
     
     
-    
-    model = model_Gent_Forward # keras.models.load_model('C:\\Users\\pgiol\\Documents\\DrRausch\\NeuralNetworks\\FinalCode\\Trained_NN_Models\\NN_Gent_Forward')
-
-    
-    Model_Output = np.loadtxt(syn_files + "\\Model_Output_ExtraSmallJm")
-    Model_Input = np.loadtxt(syn_files + "\\Model_Input_ExtraSmallJm")
+    # Load Gent Forward Model
+    model        = model_Gent_Forward
+    Model_Output = np.loadtxt(os.path.join(syn_files, "Model_Output_ExtraSmallJm"))
+    Model_Input  = np.loadtxt(os.path.join(syn_files, "Model_Input_ExtraSmallJm"))
     
         
-    Nx= len(Model_Output[:,0])
-    Nsamp= len(Model_Output[0,:])
+    Nx = len(Model_Output[:,0])
+    Nsamp = len(Model_Output[0,:])
     FEA_disp = np.linspace(0,0.5,int(Nx+1))[1:]
     Nd = 100
     Ndat = len(ExpData_Dim[:,0])
@@ -686,27 +703,19 @@ def LeastSquaresPrediction_NH(Thresh, syn_files, model_Gent_Forward, Exp_Params_
     minU = 2; maxU = 6
     minJ = min(np.log10(Model_Input[:,3])); maxJ = max(np.log10(Model_Input[:,3]))
             
-    # model = keras.models.load_model('C:\\Users\\pgiol\\Documents\\DrRausch\\NeuralNetworks\\FinalCode\\Trained_NN_Models\\NN_Gent_Forward')
     def LSQ_func(inputs, MU_guess, JM_guess):
         x_input = np.array([1,1,MU_guess, JM_guess])
         yhat_test = model.predict([x_input.tolist()])
-        # Ppred = np.zeros(Nd)
-        # for k in range(0,Nd):
-        #     minP = min(np.log10(Model_Output_Resampled[k,:])); maxP = max(np.log10(Model_Output_Resampled[k,:]))
-        #     Ppred[k] = 10**((yhat_test[0][k]*(maxP - minP) + minP))
 
         Ppred = np.zeros(Nd)
         ppred =  np.interp(xi, np.linspace(0,0.5,len(yhat_test[0][:])+1)[1:], yhat_test[0][:])[:]
         for k in range(0,Nd):
-            # Ppred[k] = 10**((yhat_train[0][k]*(Scales['maxP'][k] - Scales['minP'][k]) + Scales['minP'][k]))
             Ppred[k] = 10**((ppred[k]*(Scales['maxP'][k] - Scales['minP'][k]) + Scales['minP'][k]))
-            # Pact[k] = ((ytrain[i,k]*(Scales['maxP'][k] - Scales['minP'][k]) + Scales['minP'][k]))
 
         return  Ppred
             
     Exp_Params_DirInv_Lsq_Fix = np.zeros((Ndat,3))
     Exp_Params_DirInv_Lsq_Fix[:,2] = 100
-    # Fits_DirInv_Lsq_Fix = np.zeros((Ndat,Nd))
     Fits_DirInv_Lsq_Fix = np.copy(Fits_DirInv)
 
     for K in range(0,Ndat):
@@ -727,17 +736,16 @@ def LeastSquaresPrediction_NH(Thresh, syn_files, model_Gent_Forward, Exp_Params_
                 ppred =  np.interp(xi, np.linspace(0,0.5,len(yhat_test[0][:])+1)[1:], yhat_test[0][:])[:]
                 for k in range(0,Nd):
                     Ppred[k] = 10**((ppred[k]*(Scales['maxP'][k] - Scales['minP'][k]) + Scales['minP'][k]))
-                    # Pact[k] = ((ytrain[i,k]*(Scales['maxP'][k] - Scales['minP'][k]) + Scales['minP'][k]))       
                         
                 return  Ppred
             
             x0 =  np.copy(Exp_Params_DirInv_GT_Cl[K,:])
             x0[0] =  (np.log10(np.copy(Exp_Params_DirInv_GT_Cl[K,0]))-minU)/(maxU - minU)
-            x0[1] =  1#(np.log10(np.copy(Exp_Params_DirInv_GT_Cl[K,1]))-minJ)/(maxJ - minJ) 
+            x0[1] =  1
             
             try:
-                Lsq_params, pcov_neww = optimize.curve_fit(LSQ_Func, LSQ_Disp,LSQ_Load,p0=(x0[0], x0[1]), bounds = ([-0.25,1.0],[1.25,1.1]),ftol = 1e-15, xtol = 1e-15,maxfev=200)
-            
+                Lsq_params, pcov_neww = optimize.curve_fit(LSQ_Func, LSQ_Disp,LSQ_Load,p0=(x0[0], x0[1]), 
+                                                           bounds = ([-0.25,1.0],[1.25,1.1]), ftol = 1e-15, xtol = 1e-15,maxfev=200)
             except RuntimeError:
                 print("Error - curve_fit failed")
                         
@@ -755,7 +763,6 @@ def LeastSquaresPrediction_NH(Thresh, syn_files, model_Gent_Forward, Exp_Params_
 
     for K in range(0,Ndat):
         if Exp_Params_DirInv_GT_Cl[K,2] >= Thresh:
-            # print(K)
             Exp_Params_DirInv_GT_Cl[K,0] = Exp_Params_DirInv_Lsq_Fix[K,0]
             Exp_Params_DirInv_GT_Cl[K,1] = Exp_Params_DirInv_Lsq_Fix[K,1]
             Exp_Params_DirInv_GT_Cl[K,2] = Exp_Params_DirInv_Lsq_Fix[K,2]
@@ -892,7 +899,8 @@ def GaussNewtonMLPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_Di
     
             # Calculate new Guess
             Guesses[i+1,:] = Guesses[i,:] + np.linalg.inv(J.T @ J) @ J.T @ dy
-            
+
+
             # Adjust Guess if it passes a bounds
             for j in range(0, len(Guesses[0,:]) ):
                 if Guesses[i+1, j]  < GN_params['bounds'][0,j]:
@@ -902,12 +910,13 @@ def GaussNewtonMLPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_Di
 
             # Append Stored Cost List        
             current_cost = mean_squared_error(LSQ_Load, Ypred)
-            previous_cost = current_cost
-            costs.append(current_cost)
             
             # Check for Convergence
             if abs(previous_cost-current_cost) < GN_params['stopping_threshold']:
                 break
+            
+            previous_cost = current_cost
+            costs.append(current_cost)
                 
         return Guesses[:i+2,:], costs
         
@@ -930,8 +939,8 @@ def GaussNewtonMLPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_Di
             bounds[:,1] =  (np.log10(np.copy(bounds[:,1])) - Scales['minJ'])/(Scales['maxJ'] - Scales['minJ']) 
 
             # Important Parameters for Gauss Newton Optimizer
-            GN_params = {'iterations':1000,
-                         'stopping_threshold':1e-16,
+            GN_params = {'iterations':50,
+                         'stopping_threshold': 1e-21, #1e-16,
                          'bounds': bounds,
                          'W': (ExpData_Dim[K,0]-5)/(40-5),
                          'H': (ExpData_Dim[K,1]-5)/(40-5)}
