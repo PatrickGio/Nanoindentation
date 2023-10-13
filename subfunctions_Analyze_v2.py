@@ -91,10 +91,11 @@ def ExtractData_HertzFits(ExpData, Keys):
         
     # Averaged Experimental Data
     ExpData_Load_Avg = np.average(ExpData_Load_Fit,axis=0)
-    ExpData_W_Avg    = np.average(ExpData_Dim[:,0])*ExpData[Keys[0]]['radius']
-    ExpData_H_Avg    = np.average(ExpData_Dim[:,1])*ExpData[Keys[0]]['radius']
+    ExpData_W_Avg    = np.average(ExpData_Dim[:,0])#*ExpData[Keys[0]]['radius']
+    ExpData_H_Avg    = np.average(ExpData_Dim[:,1])#*ExpData[Keys[0]]['radius']
     ExpData_R_Avg    = np.average(ExpData_Rad[:])
     ExpData['Averaged'] = {'radius':ExpData_R_Avg, 'Height':ExpData_H_Avg, 'Width':ExpData_W_Avg, 'Load':ExpData_Load_Avg, 'Indentation': xi*ExpData_R_Avg}
+    
     
     # include averaged data
     Keys = list(ExpData.keys())
@@ -745,7 +746,7 @@ def LeastSquaresPrediction_NH(Thresh, syn_files, model_Gent_Forward, Exp_Params_
             
             try:
                 Lsq_params, pcov_neww = optimize.curve_fit(LSQ_Func, LSQ_Disp,LSQ_Load,p0=(x0[0], x0[1]), 
-                                                           bounds = ([-0.25,1.0],[1.25,1.1]), ftol = 1e-15, xtol = 1e-15,maxfev=200)
+                                                           bounds = ([-0.25,0.99999],[1.25,1.0000001]), ftol = 1e-15, xtol = 1e-15,maxfev=200)
             except RuntimeError:
                 print("Error - curve_fit failed")
                         
@@ -769,7 +770,6 @@ def LeastSquaresPrediction_NH(Thresh, syn_files, model_Gent_Forward, Exp_Params_
 
             
     return Exp_Params_DirInv_GT_Cl, Fits_DirInv_Lsq_Fix
-
 
 
 

@@ -93,11 +93,41 @@ if Data_Type == 'dict':
     # ExpData = ExpData_new
     # Keys = list( ExpData.keys() )
 
-
 elif Data_Type == 'raw':
     DataFile = exp_files + '\\%s\\%s 1 S-1 X-1 Y-1 I-1.txt'%(DirName,FileName)
     ExpData  = AnalyzeExpData(exp_files,DirName,FileName, Xs, Ys, Material_Width, Material_Thick)
     Keys     = list( ExpData.keys() )
+
+
+
+
+
+ExpData_2 = {}
+for n in range(50):
+    ExpData_2[Keys[n]] = ExpData[Keys[n]]
+
+ExpData = ExpData_2
+
+
+
+# # Fit = np.copy(Fits_Lsq_NH)
+# Fit = np.copy(Fits_DirInv_NH)
+
+# N = 50
+# Nd = 100
+# fig = plt.figure(1,figsize=(8,8))
+# plt.plot( ExpData[Keys[N]]['Indentation'][::5]/ExpData[Keys[N]]['radius'], ExpData[Keys[N]]['Load'][::5],'ok',label='Experimental Data')
+# plt.plot(np.linspace(0,0.5,Nd+1)[1:], Fit[N,:],color='navy',linewidth=3,label='ML Prediction: $\mu$=%5.2f, Jm=%5.3f'%(Exp_Params_DirInv_GT[N,0],Exp_Params_DirInv_GT[N,1]),alpha=0.5)
+
+
+
+
+
+
+
+
+
+
 
 
 
