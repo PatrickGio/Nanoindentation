@@ -105,10 +105,7 @@ def parse_cmd_line():
 
     
 
-
-
-
-def main():
+def main(args):
     ''' main function
         -------------
         |-> Load Experimental Data
@@ -124,10 +121,9 @@ def main():
     #   Load Experimental Data
     # =========================================================================
     if args.Data_Type == 'dict':
-        DataFile = os.path.join( exp_files, '%s.pickle'%(args.FileName) )
-        # DataFile = exp_files + '\\%s.pkl'%(FileName)
-        ExpData = pickle.load(open(DataFile,'rb'))
-        Keys = list( ExpData.keys() )
+        DataFile = os.path.join(exp_files, FileName+'.pickle') # FileName+'.pkl')
+        ExpData  = pickle.load(open(DataFile,'rb'))
+        Keys     = list( ExpData.keys() )
 
     elif args.Data_Type == 'raw':
         DataFile = os.path.join( exp_files, args.DirName, '%s 1 S-1 X-1 Y-1 I-1.txt'%(args.FileName) )
@@ -202,8 +198,10 @@ def main():
     
     end2 = time.localtime()
     print('Lsq Walltime:', (end2[3]-start2[3])*3600 + (end2[4]-start2[4])*60 + (end2[5]-start2[5])*1)
-    # Exp_Params_Lsq_GT_GN, Fits_Lsq_GT_GN  =  GaussNewtonMLPrediction(args.Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim, ExpData_Load,Scales, Fits_DirInv_GT)
-    
+
+    # Uncommment to run custom Gauss-Newton Optimizer
+    # Exp_Params_Lsq_GT_GN, Fits_Lsq_GT_GN  =  GaussNewtonMLPrediction(Thresh, syn_files, model_Gent_Forward, Exp_Params_DirInv_GT, ExpData_Dim, ExpData_Load,Scales, Fits_DirInv_GT)
+        
     
     
     # =========================================================================
@@ -214,8 +212,6 @@ def main():
     
     elif args.Mat_Mod == 'Gent':
         Plot(ExpData, Fits_Lsq_GT, Exp_Params_Lsq_GT)
-    
-    # np.savetxt('%s\\%s_MaterialParameters.txt'%(res_files,args.FileName), Exp_Params_DirInv_GT)
     
     
     
@@ -230,7 +226,6 @@ def main():
 
 
 if __name__ == '__main__':
-    
     # =========================================================================
     #   Command Line Arguements
     # =========================================================================
@@ -241,12 +236,21 @@ if __name__ == '__main__':
     # =========================================================================
     #   main function
     # =========================================================================
-    Exp_Params, Fits = main()
+    Exp_Params, Fits = main(args)
 
 
 
-
-
+    # =========================================================================
+    #   Save Material Parameters
+    # =========================================================================
+    if Mat_Mod == 'neoHookean':
+        save_path = os.path.join(res_files,args.FileName+'_MaterialParameters_NH.txt')
+        np.savetxt(save_path , Exp_Params)
+        
+    elif Mat_Mod == 'Gent':
+        save_path = os.path.join(res_files,args.FileName+'_MaterialParameters_GT.txt')
+        np.savetxt(save_path , Exp_Params)    
+    
 
 
 

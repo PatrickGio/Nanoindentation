@@ -91,8 +91,8 @@ def ExtractData_HertzFits(ExpData, Keys):
         
     # Averaged Experimental Data
     ExpData_Load_Avg = np.average(ExpData_Load_Fit,axis=0)
-    ExpData_W_Avg    = np.average(ExpData_Dim[:,0])#*ExpData[Keys[0]]['radius']
-    ExpData_H_Avg    = np.average(ExpData_Dim[:,1])#*ExpData[Keys[0]]['radius']
+    ExpData_W_Avg    = np.average(ExpData_Dim[:,0])
+    ExpData_H_Avg    = np.average(ExpData_Dim[:,1])
     ExpData_R_Avg    = np.average(ExpData_Rad[:])
     ExpData['Averaged'] = {'radius':ExpData_R_Avg, 'Height':ExpData_H_Avg, 'Width':ExpData_W_Avg, 'Load':ExpData_Load_Avg, 'Indentation': xi*ExpData_R_Avg}
     
@@ -125,9 +125,9 @@ def ExtractData_HertzFits(ExpData, Keys):
         Eff_mh = (newp_mh*3/4/np.sqrt(25e-6))
         
         # Calculate Shear Modulus and Youngs Modulus
-        ExpData_u_Hertz[i]    = (Eff_h*(1-nu**2))   /(2+2*nu) #*((radius*unit_rad)**2)/((25e-6)**2)
+        ExpData_u_Hertz[i]    = (Eff_h*(1-nu**2))   /(2+2*nu)
         ExpData_E_Hertz[i]    = Eff_h
-        ExpData_u_ModHertz[i] = newp_mh/(2+2*nu) # / ( ((radius*unit_rad)**2)/((25e-6)**2) )
+        ExpData_u_ModHertz[i] = newp_mh/(2+2*nu)
         ExpData_E_ModHertz[i] = Eff_mh
     
         # Find RMSE between the Hertzian Fits and Data
@@ -283,7 +283,6 @@ def Prepare_DirInv_ABFits_GT(ExpData, Keys, syn_files):
     minh, maxh  =  min(Model_Input[:,1]), max(Model_Input[:,1])
     minB, maxB  =  min(FEA_fit_params[:,1]), max(FEA_fit_params[:,1])
     minU, maxU  =  2, 6
-    # minJ = min(Model_Input[:,3]); maxJ = max(Model_Input[:,3])
     minJ, maxJ  =  min(np.log10(Model_Input[:,3])), max(np.log10(Model_Input[:,3]))
     minP, maxP  =  np.zeros(Nd), np.zeros(Nd)
     for i in range(0,Nd):
@@ -419,7 +418,6 @@ def Direct_Inverse_ML_Approach_Gent_Data(model_Gent_Inverse_ABFits, Exp_Input, S
         # Re-dimensionalized and Scale Output
         Exp_Params_Scaled[i] = (yhat / ((ExpData[Keys[i]]['radius'])**2  / (25e-6)**2 )  ) 
         Exp_Params[i,0] = 10**( ((Exp_Params_Scaled[i,0]/1 + 0.0 ) * (Scales['maxU'] - Scales['minU'])*1)  + Scales['minU'] )
-        # Exp_Params[i,1] = 1*(((Exp_Params_Scaled[i,1]/1 + 0.0 ) * (Scales['maxJ'] - Scales['minJ'])*1)  + Scales['minJ'])
         Exp_Params[i,1] = 10**( ((Exp_Params_Scaled[i,1]/1 + 0.0 ) * (Scales['maxJ'] - Scales['minJ'])*1)  + Scales['minJ'] )
     
     # Ensure the Model Doesn't try to Predict to Far Out of The Trained 
